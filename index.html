@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unit Converter — Length, Weight, Temperature</title>
+<meta name="description" content="Instant length, weight and temperature conversion. 100% in-browser.">
+<style>
+  :root{
+    --bg:#0d1117; --card:#161b22; --line:#30363d; --txt:#e6edf3; --dim:#8b949e;
+    --acc:#58a6ff; --acc2:#3fb950;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--txt);font-family:-apple-system,"Segoe UI",Inter,Roboto,sans-serif;
+    min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:32px 16px 48px}
+  .wrap{width:100%;max-width:520px}
+  header{text-align:center;margin-bottom:20px}
+  header h1{font-size:1.8rem;letter-spacing:-.5px}
+  header h1 span{color:var(--acc)}
+  header p{color:var(--dim);margin-top:8px;font-size:.95rem}
+  .tabs{display:flex;gap:8px;margin-bottom:16px}
+  .tab{flex:1;padding:11px 4px;text-align:center;background:var(--card);border:1px solid var(--line);
+    border-radius:10px;cursor:pointer;color:var(--dim);font-weight:600;font-size:.9rem;transition:all .15s}
+  .tab.active{color:var(--txt);border-color:var(--acc);background:#1a2740}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px}
+  label{display:block;font-size:.75rem;color:var(--dim);margin:14px 0 6px;text-transform:uppercase;letter-spacing:.6px}
+  label:first-child{margin-top:0}
+  input[type=text],input[type=number]{width:100%;background:var(--bg);border:1px solid var(--line);
+    border-radius:10px;color:var(--txt);padding:13px;font-size:1.15rem;font-family:inherit;font-variant-numeric:tabular-nums}
+  input:focus,select:focus{outline:none;border-color:var(--acc)}
+  select{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:10px;color:var(--txt);
+    padding:12px;font-size:1rem;font-family:inherit;appearance:none;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238b949e' stroke-width='2' fill='none'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;background-position:right 14px center}
+  .swaprow{display:flex;align-items:center;gap:10px;margin:14px 0 0}
+  .swaprow .grow{flex:1;min-width:0}
+  #swap{flex:0 0 auto;width:44px;height:44px;border-radius:50%;border:1px solid var(--line);
+    background:var(--bg);color:var(--acc);font-size:1.1rem;cursor:pointer;margin-top:22px}
+  #swap:hover{border-color:var(--acc)}
+  .result{margin-top:18px;background:var(--bg);border:1px solid var(--line);border-radius:10px;
+    padding:16px;text-align:center}
+  .result .v{font-size:1.7rem;font-weight:700;color:var(--acc2);font-variant-numeric:tabular-nums;word-break:break-all}
+  .result .f{color:var(--dim);font-size:.85rem;margin-top:6px}
+  .msg{min-height:1.4em;text-align:center;color:#f85149;font-size:.85rem;margin-top:10px}
+  footer{margin-top:20px;text-align:center;color:var(--dim);font-size:.8rem;line-height:1.7}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1><span>◈</span> Unit Converter</h1>
+    <p>Type a value — conversion is instant. Nothing leaves your browser.</p>
+  </header>
+
+  <div class="tabs" id="tabs">
+    <div class="tab active" data-cat="length">Length</div>
+    <div class="tab" data-cat="weight">Weight</div>
+    <div class="tab" data-cat="temp">Temperature</div>
+  </div>
+
+  <div class="card">
+    <label>Value</label>
+    <input type="number" id="val" placeholder="0" step="any">
+    <div class="swaprow">
+      <div class="grow">
+        <label>From</label>
+        <select id="from"></select>
+      </div>
+      <button id="swap" title="Swap units">⇄</button>
+      <div class="grow">
+        <label>To</label>
+        <select id="to"></select>
+      </div>
+    </div>
+    <div class="result">
+      <div class="v" id="out">—</div>
+      <div class="f" id="formula"></div>
+    </div>
+    <div class="msg" id="msg"></div>
+  </div>
+
+  <footer>Length &amp; weight convert through SI base units.<br>Temperature converts through Celsius.</footer>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+
+const CATS = {
+  length: {
+    label: 'Length',
+    units: [
+      ['Millimeter','mm',0.001], ['Centimeter','cm',0.01], ['Meter','m',1],
+      ['Kilometer','km',1000], ['Inch','in',0.0254], ['Foot','ft',0.3048],
+      ['Yard','yd',0.9144], ['Mile','mi',1609.344]
+    ],
+    // factor = how many meters in one unit
+    convert(v, from, to){
+      const f = this.units.find(u=>u[1]===from)[2];
+      const t = this.units.find(u=>u[1]===to)[2];
+      return v * f / t;
+    }
+  },
+  weight: {
+    label: 'Weight',
+    units: [
+      ['Milligram','mg',1e-6], ['Gram','g',0.001], ['Kilogram','kg',1],
+      ['Metric ton','t',1000], ['Pound','lb',0.45359237], ['Ounce','oz',0.028349523125]
+    ],
+    convert(v, from, to){
+      const f = this.units.find(u=>u[1]===from)[2];
+      const t = this.units.find(u=>u[1]===to)[2];
+      return v * f / t;
+    }
+  },
+  temp: {
+    label: 'Temperature',
+    units: [['Celsius','C',1],['Fahrenheit','F',1],['Kelvin','K',1]],
+    toC(v, u){ return u==='C' ? v : u==='F' ? (v-32)*5/9 : v-273.15; },
+    fromC(c, u){ return u==='C' ? c : u==='F' ? c*9/5+32 : c+273.15; },
+    convert(v, from, to){ return this.fromC(this.toC(v, from), to); }
+  }
+};
+
+let cat = 'length';
+
+function fillUnits(){
+  const c = CATS[cat];
+  $('from').innerHTML = c.units.map(u=>'<option value="'+u[1]+'">'+u[0]+'</option>').join('');
+  $('to').innerHTML   = c.units.map(u=>'<option value="'+u[1]+'">'+u[0]+'</option>').join('');
+  $('from').selectedIndex = 0;
+  $('to').selectedIndex = Math.min(1, c.units.length-1);
+}
+
+function fmt(n){
+  if (!isFinite(n)) return '—';
+  if (n !== 0 && (Math.abs(n) >= 1e12 || Math.abs(n) < 1e-9)) return n.toExponential(6);
+  const r = Math.round(n * 1e10) / 1e10;   // kill float dust
+  return r.toLocaleString('en-US', {maximumFractionDigits: 10});
+}
+
+function unitName(code){
+  const u = CATS[cat].units.find(u=>u[1]===code);
+  return u ? u[0] : code;
+}
+
+function convertNow(){
+  const raw = $('val').value.trim();
+  $('msg').textContent = '';
+  if (raw === '' || isNaN(Number(raw))){
+    $('out').textContent = '—'; $('formula').textContent = '';
+    return;
+  }
+  const v = Number(raw);
+  const from = $('from').value, to = $('to').value;
+  if (cat === 'temp' && from === 'K' && v < 0){
+    $('msg').textContent = 'Kelvin cannot be below absolute zero (0 K).';
+    $('out').textContent = '—'; $('formula').textContent = '';
+    return;
+  }
+  const r = CATS[cat].convert(v, from, to);
+  if (cat === 'temp' && to === 'K' && r < -1e-9){
+    $('msg').textContent = 'Result is below absolute zero — check your input.';
+    $('out').textContent = '—'; $('formula').textContent = '';
+    return;
+  }
+  $('out').textContent = fmt(r);
+  $('formula').textContent = fmt(v) + ' ' + unitName(from) + ' = ' + fmt(r) + ' ' + unitName(to);
+}
+
+$('tabs').addEventListener('click', e=>{
+  const t = e.target.closest('.tab');
+  if(!t) return;
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+  t.classList.add('active');
+  cat = t.dataset.cat;
+  fillUnits();
+  convertNow();
+});
+$('val').addEventListener('input', convertNow);
+$('from').addEventListener('change', convertNow);
+$('to').addEventListener('change', convertNow);
+$('swap').addEventListener('click', ()=>{
+  const f = $('from').value;
+  $('from').value = $('to').value;
+  $('to').value = f;
+  convertNow();
+});
+
+fillUnits();
+convertNow();
+</script>
+</body>
+</html>
