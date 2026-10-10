@@ -1,0 +1,63 @@
+/* the colors used all over the page — change a value here and it updates everywhere */
+:root{
+  --bg:#0d1117; --card:#161b22; --line:#30363d; --txt:#e6edf3; --dim:#8b949e;
+  --acc:#58a6ff; --acc2:#3fb950;
+}
+/* remove the browser's default spacing so our layout starts clean */
+*{box-sizing:border-box;margin:0;padding:0}
+/* the whole page: dark background, light text, everything centered in a column */
+body{background:var(--bg);color:var(--txt);font-family:-apple-system,"Segoe UI",Inter,Roboto,sans-serif;
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:32px 16px 48px}
+/* the narrow column that holds all the content */
+.wrap{width:100%;max-width:520px}
+/* centers the title block at the top */
+header{text-align:center;margin-bottom:20px}
+/* the big page title */
+header h1{font-size:1.8rem;letter-spacing:-.5px}
+/* the little diamond symbol next to the title, shown in blue */
+header h1 span{color:var(--acc)}
+/* the small grey subtitle under the title */
+header p{color:var(--dim);margin-top:8px;font-size:.95rem}
+/* the row of category tabs: Length, Weight, Temperature */
+.tabs{display:flex;gap:8px;margin-bottom:16px}
+/* one category tab */
+.tab{flex:1;padding:11px 4px;text-align:center;background:var(--card);border:1px solid var(--line);
+  border-radius:10px;cursor:pointer;color:var(--dim);font-weight:600;font-size:.9rem;transition:all .15s}
+/* the currently selected tab — brighter with a blue border */
+.tab.active{color:var(--txt);border-color:var(--acc);background:#1a2740}
+/* the card holding the converter controls */
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px}
+/* the small uppercase labels above the inputs, like VALUE and FROM */
+label{display:block;font-size:.75rem;color:var(--dim);margin:14px 0 6px;text-transform:uppercase;letter-spacing:.6px}
+/* the first label has no top margin so it hugs the card top */
+label:first-child{margin-top:0}
+/* the value input and the unit dropdowns */
+input[type=text],input[type=number]{width:100%;background:var(--bg);border:1px solid var(--line);
+  border-radius:10px;color:var(--txt);padding:13px;font-size:1.15rem;font-family:inherit;font-variant-numeric:tabular-nums}
+/* blue border on the input or dropdown you are using */
+input:focus,select:focus{outline:none;border-color:var(--acc)}
+/* the From/To dropdowns, with a custom little arrow on the right */
+select{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:10px;color:var(--txt);
+  padding:12px;font-size:1rem;font-family:inherit;appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238b949e' stroke-width='2' fill='none'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 14px center}
+/* the row holding From dropdown, swap button, and To dropdown */
+.swaprow{display:flex;align-items:center;gap:10px;margin:14px 0 0}
+/* lets each dropdown stretch to fill its share of the row */
+.swaprow .grow{flex:1;min-width:0}
+/* the round ⇄ button that swaps From and To */
+#swap{flex:0 0 auto;width:44px;height:44px;border-radius:50%;border:1px solid var(--line);
+  background:var(--bg);color:var(--acc);font-size:1.1rem;cursor:pointer;margin-top:22px}
+/* blue border on the swap button when your mouse hovers over it */
+#swap:hover{border-color:var(--acc)}
+/* the result box showing the converted number */
+.result{margin-top:18px;background:var(--bg);border:1px solid var(--line);border-radius:10px;
+  padding:16px;text-align:center}
+/* the big converted number, shown in green */
+.result .v{font-size:1.7rem;font-weight:700;color:var(--acc2);font-variant-numeric:tabular-nums;word-break:break-all}
+/* the small line under the result, like "5 Kilometer = 3.1 Mile" */
+.result .f{color:var(--dim);font-size:.85rem;margin-top:6px}
+/* the red error line, e.g. for below-absolute-zero temperatures */
+.msg{min-height:1.4em;text-align:center;color:#f85149;font-size:.85rem;margin-top:10px}
+/* the small note at the very bottom of the page */
+footer{margin-top:20px;text-align:center;color:var(--dim);font-size:.8rem;line-height:1.7}

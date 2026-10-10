@@ -17,4 +17,10 @@ Open `index.html` in any browser. Pick a category tab, type a value, choose **Fr
 - Temperature converts through Celsius: `°F→°C = (°F−32)×5/9`, `K→°C = K−273.15`, then back out with the inverse formulas.
 - Results are rounded to 10 significant decimals to remove floating-point dust, and very large/small values fall back to exponential notation.
 
-Single self-contained file — HTML, CSS and JS inline. No libraries, no network requests, works offline.
+## Files
+
+- `index.html` — the page markup
+- `styles.css` — all the styling, with plain-English comments
+- `app.js` — the conversion logic, with plain-English comments
+
+No libraries, no network requests, works offline.
